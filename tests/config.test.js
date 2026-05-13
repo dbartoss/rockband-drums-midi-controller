@@ -63,11 +63,12 @@ describe('Config', () => {
       expect(appConfig).toHaveProperty('productId');
       expect(appConfig).toHaveProperty('pollRateHz');
       expect(appConfig).toHaveProperty('debounceMs');
+      expect(appConfig).toHaveProperty('diagnosticMode');
     });
 
     test('should have default values', () => {
       const appConfig = config.getConfig();
-      expect(appConfig.midiPort).toBe('Rock Band Drums');
+      expect(appConfig.midiPort).toBe('IAC Driver Bus 1');
       expect(appConfig.vendorId).toBe(0x12ba);
       expect(appConfig.productId).toBe(0x0210);
       expect(appConfig.pollRateHz).toBe(60);

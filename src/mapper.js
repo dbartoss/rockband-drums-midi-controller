@@ -40,15 +40,41 @@ function getVelocity(pressure = null) {
 
 /**
  * Map raw HID data to pad press
- * NOTE: HID byte format will be discovered in Phase 2.1
- * 
+ * HID byte mapping discovered from hardware testing:
+ * byte[0] values map to pads/pedals (corrected for actual button positions):
+ * - [0]:1 = Yellow pad (Hi-Hat)
+ * - [0]:2 = Blue pad (Tom-Tom)
+ * - [0]:4 = Red pad (Snare Drum)
+ * - [0]:8 = Green pad (Crash Cymbal)
+ * - [0]:16 = Kick pedal (Bass Drum)
+ *
+ * Ignored:
+ * - byte[2] = 8 (Blue X face button, stuck/always on)
+ * - bytes[3-6] = 128 (pressure/axis data)
+ * - bytes[20-26] = 2 (baseline states)
+ *
  * @param {Buffer} data - Raw HID data
  * @returns {Object} { padName, velocity } or null if no press
  */
 function mapHidDataToPad(data) {
-  // TODO: Implement after discovering HID format
-  // For now, return null to indicate discovery phase
-  return null;
+  if (!data || data.length === 0) return null;
+
+  const byte0 = data[0];
+
+  switch (byte0) {
+    case 1:
+      return { padName: 'blue', velocity: byte0 };    // Blue pad = Tom-Tom
+    case 2:
+      return { padName: 'green', velocity: byte0 };   // Green pad = Crash Cymbal
+    case 4:
+      return { padName: 'red', velocity: byte0 };     // Red pad = Snare Drum
+    case 8:
+      return { padName: 'yellow', velocity: byte0 };  // Yellow pad = Hi-Hat
+    case 16:
+      return { padName: 'kick', velocity: byte0 };    // Kick pedal = Bass Drum
+    default:
+      return null;
+  }
 }
 
 module.exports = {

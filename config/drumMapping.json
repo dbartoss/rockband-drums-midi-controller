@@ -1,30 +1,40 @@
 {
-  "description": "MIDI note mappings for drum pads (GM drum kit standard)",
+  "description": "MIDI note mappings for Rock Band drums (GM drum kit standard)",
   "pads": {
     "red": {
-      "midiNote": 36,
-      "name": "Bass Drum / Kick",
-      "hex": "0x24"
+      "midiNote": 38,
+      "name": "Snare Drum",
+      "hex": "0x26",
+      "color": "Red",
+      "source": "Red pad (stick hit)"
     },
     "yellow": {
-      "midiNote": 41,
-      "name": "Low Tom",
-      "hex": "0x29"
+      "midiNote": 42,
+      "name": "Closed Hi-Hat",
+      "hex": "0x2a",
+      "color": "Yellow",
+      "source": "Yellow pad (stick hit)"
     },
     "blue": {
       "midiNote": 48,
-      "name": "High-Tom/Hi-Mid Tom",
-      "hex": "0x30"
+      "name": "Tom-Tom (High)",
+      "hex": "0x30",
+      "color": "Blue",
+      "source": "Blue pad (stick hit)"
     },
     "green": {
-      "midiNote": 45,
-      "name": "Low-Mid Tom",
-      "hex": "0x2d"
+      "midiNote": 49,
+      "name": "Crash Cymbal 1",
+      "hex": "0x31",
+      "color": "Green",
+      "source": "Green pad (stick hit)"
     },
     "kick": {
       "midiNote": 36,
-      "name": "Bass Drum / Kick Pedal",
-      "hex": "0x24"
+      "name": "Bass Drum / Kick",
+      "hex": "0x24",
+      "color": "Orange",
+      "source": "Kick pedal (leg)"
     },
     "cymbal": {
       "midiNote": 49,
@@ -36,10 +46,11 @@
     "default": 100,
     "min": 10,
     "max": 127,
-    "description": "MIDI velocity values (10-127). Will be populated from HID pressure data if available."
+    "description": "MIDI velocity values (10-127). Rock Band drums send fixed velocity (1-16), mapped to velocity range."
   },
   "reference": {
     "url": "https://en.wikipedia.org/wiki/General_MIDI",
-    "gmDrumKit": "Uses General MIDI Drum Kit standard (channel 10, notes 35-81)"
+    "gmDrumKit": "Uses General MIDI Drum Kit standard (channel 10, notes 35-81)",
+    "hardwareDiscovery": "Harmonix Drum Kit PS3 (0x12ba:0x0210) - HID byte[0] mapping"
   }
 }

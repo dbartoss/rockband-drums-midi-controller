@@ -29,7 +29,8 @@ function getConfig() {
     usePressureVelocity: process.env.USE_PRESSURE_VELOCITY === 'true',
     defaultVelocity: parseInt(process.env.DEFAULT_VELOCITY) || 100,
     debug: process.env.DEBUG === 'true',
-    logHidData: process.env.LOG_HID_DATA === 'true'
+    logHidData: process.env.LOG_HID_DATA === 'true',
+    diagnosticMode: process.env.DIAGNOSTIC_MODE === 'true'
   };
 }
 
