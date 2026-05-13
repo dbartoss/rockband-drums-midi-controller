@@ -1,0 +1,45 @@
+{
+  "description": "MIDI note mappings for drum pads (GM drum kit standard)",
+  "pads": {
+    "red": {
+      "midiNote": 36,
+      "name": "Bass Drum / Kick",
+      "hex": "0x24"
+    },
+    "yellow": {
+      "midiNote": 41,
+      "name": "Low Tom",
+      "hex": "0x29"
+    },
+    "blue": {
+      "midiNote": 48,
+      "name": "High-Tom/Hi-Mid Tom",
+      "hex": "0x30"
+    },
+    "green": {
+      "midiNote": 45,
+      "name": "Low-Mid Tom",
+      "hex": "0x2d"
+    },
+    "kick": {
+      "midiNote": 36,
+      "name": "Bass Drum / Kick Pedal",
+      "hex": "0x24"
+    },
+    "cymbal": {
+      "midiNote": 49,
+      "name": "Crash Cymbal 1",
+      "hex": "0x31"
+    }
+  },
+  "velocity": {
+    "default": 100,
+    "min": 10,
+    "max": 127,
+    "description": "MIDI velocity values (10-127). Will be populated from HID pressure data if available."
+  },
+  "reference": {
+    "url": "https://en.wikipedia.org/wiki/General_MIDI",
+    "gmDrumKit": "Uses General MIDI Drum Kit standard (channel 10, notes 35-81)"
+  }
+}

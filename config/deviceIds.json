@@ -1,0 +1,13 @@
+{
+  "description": "Supported drum controller device IDs",
+  "devices": [
+    {
+      "name": "Harmonix Drum Kit PS3",
+      "vendorId": 4794,
+      "productId": 528,
+      "version": "10.00",
+      "manufacturer": "Sony Computer Entertainment America",
+      "notes": "Tested PlayStation 3 Harmonix drum kit"
+    }
+  ]
+}
