@@ -7,22 +7,22 @@ const mapper = require('../src/mapper');
 
 describe('Mapper', () => {
   describe('mapPadToNote', () => {
-    test('should map red pad to MIDI note 38 (snare drum)', () => {
+    test('should map red pad to MIDI note 42 (closed hi-hat)', () => {
       const note = mapper.mapPadToNote('red');
-      expect(note).toBe(38);
-    });
-
-    test('should map yellow pad to MIDI note 42 (closed hi-hat)', () => {
-      const note = mapper.mapPadToNote('yellow');
       expect(note).toBe(42);
     });
 
-    test('should map blue pad to MIDI note 48 (tom-tom high)', () => {
-      const note = mapper.mapPadToNote('blue');
-      expect(note).toBe(48);
+    test('should map yellow pad to MIDI note 45 (low tom / small crash)', () => {
+      const note = mapper.mapPadToNote('yellow');
+      expect(note).toBe(45);
     });
 
-    test('should map green pad to MIDI note 49 (crash cymbal 1)', () => {
+    test('should map blue pad to MIDI note 38 (snare drum)', () => {
+      const note = mapper.mapPadToNote('blue');
+      expect(note).toBe(38);
+    });
+
+    test('should map green pad to MIDI note 49 (crash cymbal 1 / ride)', () => {
       const note = mapper.mapPadToNote('green');
       expect(note).toBe(49);
     });
@@ -32,7 +32,7 @@ describe('Mapper', () => {
       expect(note).toBe(36);
     });
 
-    test('should map cymbal to MIDI note 49 (crash cymbal 1)', () => {
+    test('should map cymbal to MIDI note 49 (crash cymbal 1 / ride)', () => {
       const note = mapper.mapPadToNote('cymbal');
       expect(note).toBe(49);
     });

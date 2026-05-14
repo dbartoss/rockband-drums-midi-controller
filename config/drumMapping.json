@@ -1,32 +1,42 @@
 {
-  "description": "MIDI note mappings for Rock Band drums (GM drum kit standard)",
+  "description": "MIDI note mappings for Rock Band drums (General MIDI drum kit standard)",
+  "mode": "realistic",
+  "modeDescription": "Realistic drum kit layout - maps pad positions to actual drum kit ergonomics. See DRUM_MAPPING.md for alternatives.",
   "pads": {
     "red": {
-      "midiNote": 38,
-      "name": "Snare Drum",
-      "hex": "0x26",
-      "color": "Red",
-      "source": "Red pad (stick hit)"
-    },
-    "yellow": {
       "midiNote": 42,
       "name": "Closed Hi-Hat",
       "hex": "0x2a",
+      "color": "Red",
+      "position": "Top-Left",
+      "realPosition": "Drummer's left (hi-hat pedal area)",
+      "source": "Red pad (stick hit)"
+    },
+    "yellow": {
+      "midiNote": 45,
+      "name": "Low Tom / Small Crash",
+      "hex": "0x2d",
       "color": "Yellow",
+      "position": "Top-Right",
+      "realPosition": "Drummer's right-up (small tom or right crash)",
       "source": "Yellow pad (stick hit)"
     },
     "blue": {
-      "midiNote": 48,
-      "name": "Tom-Tom (High)",
-      "hex": "0x30",
+      "midiNote": 38,
+      "name": "Snare Drum",
+      "hex": "0x26",
       "color": "Blue",
+      "position": "Bottom-Left",
+      "realPosition": "Center-low (snare position)",
       "source": "Blue pad (stick hit)"
     },
     "green": {
       "midiNote": 49,
-      "name": "Crash Cymbal 1",
+      "name": "Crash Cymbal 1 / Ride",
       "hex": "0x31",
       "color": "Green",
+      "position": "Bottom-Right",
+      "realPosition": "Drummer's right-low (floor tom or ride cymbal)",
       "source": "Green pad (stick hit)"
     },
     "kick": {
@@ -34,12 +44,15 @@
       "name": "Bass Drum / Kick",
       "hex": "0x24",
       "color": "Orange",
+      "position": "Pedal",
+      "realPosition": "Below kick pedal (standard position)",
       "source": "Kick pedal (leg)"
     },
     "cymbal": {
       "midiNote": 49,
-      "name": "Crash Cymbal 1",
-      "hex": "0x31"
+      "name": "Crash Cymbal 1 / Ride",
+      "hex": "0x31",
+      "note": "Alias for green pad (same MIDI note)"
     }
   },
   "velocity": {
@@ -48,9 +61,28 @@
     "max": 127,
     "description": "MIDI velocity values (10-127). Rock Band drums send fixed velocity (1-16), mapped to velocity range."
   },
+  "modes": {
+    "game-based": {
+      "description": "Original Rock Band game mapping (not realistic for drumming)",
+      "red": 38,
+      "yellow": 42,
+      "blue": 48,
+      "green": 49,
+      "reason": "Matches Rock Band game color-to-sound assignments"
+    },
+    "realistic": {
+      "description": "Real drum kit layout (recommended for actual drumming)",
+      "red": 42,
+      "yellow": 45,
+      "blue": 38,
+      "green": 49,
+      "reason": "Matches real drum kit ergonomics and positions"
+    }
+  },
   "reference": {
     "url": "https://en.wikipedia.org/wiki/General_MIDI",
     "gmDrumKit": "Uses General MIDI Drum Kit standard (channel 10, notes 35-81)",
-    "hardwareDiscovery": "Harmonix Drum Kit PS3 (0x12ba:0x0210) - HID byte[0] mapping"
+    "hardwareDiscovery": "Harmonix Drum Kit PS3 (0x12ba:0x0210) - HID byte[0] mapping",
+    "documentation": "See DRUM_MAPPING.md for detailed explanation of both modes"
   }
 }
