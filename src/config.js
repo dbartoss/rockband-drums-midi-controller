@@ -30,7 +30,8 @@ function getConfig() {
     defaultVelocity: parseInt(process.env.DEFAULT_VELOCITY) || 100,
     debug: process.env.DEBUG === 'true',
     logHidData: process.env.LOG_HID_DATA === 'true',
-    diagnosticMode: process.env.DIAGNOSTIC_MODE === 'true'
+    diagnosticMode: process.env.DIAGNOSTIC_MODE === 'true',
+    drumMappingMode: process.env.DRUM_MAPPING_MODE || 'realistic'
   };
 }
 

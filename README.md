@@ -83,20 +83,32 @@ npm run test:coverage # Coverage report
 
 ### Drum Pad Mappings
 
-Edit `config/drumMapping.json` to customize MIDI note mappings:
+Two mapping modes are available:
 
-```json
-{
-  "pads": {
-    "red": { "midiNote": 36, "name": "Bass Drum" },
-    "yellow": { "midiNote": 41, "name": "Low Tom" },
-    "blue": { "midiNote": 48, "name": "High Tom" },
-    "green": { "midiNote": 45, "name": "Low-Mid Tom" },
-    "kick": { "midiNote": 36, "name": "Kick Pedal" },
-    "cymbal": { "midiNote": 49, "name": "Crash Cymbal" }
-  }
-}
+- **Realistic** (default): Pad positions match real drum kit ergonomics
+- **Game-Based**: Pad positions match Rock Band game layout
+
+Switch between modes at startup:
+
+```bash
+# Use realistic mapping (default)
+npm start
+
+# Use game-based mapping
+DRUM_MAPPING_MODE=game-based npm start
 ```
+
+Or switch programmatically:
+
+```javascript
+const mapper = require('./src/mapper');
+mapper.setMappingMode('game-based');    // Switch to game-based
+mapper.setMappingMode('realistic');     // Switch to realistic
+mapper.getMappingMode();                // Get current mode
+mapper.getAvailableModes();             // List available modes
+```
+
+See [MAPPING_TOGGLE.md](./MAPPING_TOGGLE.md) for detailed usage and [DRUM_MAPPING.md](./DRUM_MAPPING.md) for comparison.
 
 ### Supported Devices
 

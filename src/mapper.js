@@ -13,9 +13,22 @@ const config = require('./config');
  */
 function mapPadToNote(padName) {
   const drumMapping = config.loadDrumMapping();
-  
+  const appConfig = config.getConfig();
+
   if (!drumMapping.pads[padName]) {
     throw new Error(`Unknown pad: ${padName}`);
+  }
+
+  const mode = appConfig.drumMappingMode || 'realistic';
+  const modeMapping = drumMapping.modes[mode];
+
+  if (!modeMapping) {
+    throw new Error(`Unknown mapping mode: ${mode}`);
+  }
+
+  // If mode has explicit mapping for this pad, use it; otherwise use pad's default
+  if (modeMapping[padName] !== undefined) {
+    return modeMapping[padName];
   }
 
   return drumMapping.pads[padName].midiNote;
@@ -73,8 +86,44 @@ function mapHidDataToPad(data) {
     .map(({ bit, padName }) => ({ padName, velocity: bit }));
 }
 
+/**
+ * Switch drum mapping mode
+ * @param {string} mode - 'game-based' or 'realistic'
+ * @throws {Error} if mode is invalid
+ */
+function setMappingMode(mode) {
+  const drumMapping = config.loadDrumMapping();
+
+  if (!drumMapping.modes[mode]) {
+    throw new Error(`Unknown mapping mode: ${mode}. Valid modes: ${Object.keys(drumMapping.modes).join(', ')}`);
+  }
+
+  process.env.DRUM_MAPPING_MODE = mode;
+}
+
+/**
+ * Get current drum mapping mode
+ * @returns {string} current mode ('game-based' or 'realistic')
+ */
+function getMappingMode() {
+  const appConfig = config.getConfig();
+  return appConfig.drumMappingMode || 'realistic';
+}
+
+/**
+ * Get available mapping modes
+ * @returns {Array<string>} list of available modes
+ */
+function getAvailableModes() {
+  const drumMapping = config.loadDrumMapping();
+  return Object.keys(drumMapping.modes);
+}
+
 module.exports = {
   mapPadToNote,
   getVelocity,
-  mapHidDataToPad
+  mapHidDataToPad,
+  setMappingMode,
+  getMappingMode,
+  getAvailableModes
 };
