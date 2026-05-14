@@ -9,6 +9,7 @@ const midiOutput = require('./midiOutput');
 const mapper = require('./mapper');
 const logger = require('./logger');
 const latencyMonitor = require('./latencyMonitor');
+const hidDiagnostics = require('./hidDiagnostics');
 
 let isRunning = false;
 let pollInterval = null;
@@ -19,6 +20,9 @@ let previousHidState = null;
 
 // Latency monitoring
 let latencyAggregator = null;
+
+// HID diagnostics
+let hidAnalyzer = null;
 
 /**
  * Extract non-zero bytes from HID data
@@ -65,6 +69,9 @@ async function start(device) {
         const midiSendTime = latencyAggregator.getTracker('MIDI Send', 5);
         const pollCycleTime = latencyAggregator.getTracker('Poll Cycle', 0);
 
+        // Initialize HID diagnostics
+        hidAnalyzer = hidDiagnostics.createHidAnalyzer();
+
         // Start polling loop
         isRunning = true;
         let previousState = {};
@@ -95,6 +102,11 @@ async function start(device) {
                 const mapStart = mapTime.start();
                 const padPresses = mapper.mapHidDataToPad(data);
                 mapTime.end(mapStart, { pads: padPresses.map(p => p.padName).join(',') || 'none' });
+
+                // Record for diagnostics (if enabled)
+                if (padPresses.length > 0) {
+                    hidAnalyzer.recordPadPress(data, padPresses[0]);
+                }
 
                 const activePads = new Set(padPresses.map(p => p.padName));
                 const nonZeroBytes = extractNonZeroBytes(data);
@@ -210,9 +222,56 @@ function resetLatency() {
     }
 }
 
+/**
+ * Report HID data diagnostics
+ */
+function reportHidDiagnostics() {
+    if (!hidAnalyzer) {
+        console.log('HID diagnostics not initialized. Start the controller first.');
+        return;
+    }
+    hidAnalyzer.reportRawData(10);
+    hidAnalyzer.reportPressureBytes();
+    hidAnalyzer.reportStatistics();
+}
+
+/**
+ * Measure velocity correlation (comparing weak vs strong strikes)
+ */
+function measureVelocity() {
+    if (!hidAnalyzer) {
+        console.log('HID diagnostics not initialized. Start the controller first.');
+        return;
+    }
+    hidAnalyzer.measureVelocityCorrelation();
+}
+
+/**
+ * Get HID measurement count
+ */
+function getHidMeasurementCount() {
+    if (!hidAnalyzer) {
+        return 0;
+    }
+    return hidAnalyzer.getMeasurementCount();
+}
+
+/**
+ * Reset HID diagnostics
+ */
+function resetHidDiagnostics() {
+    if (hidAnalyzer) {
+        hidAnalyzer.reset();
+    }
+}
+
 module.exports = {
     start,
     stop,
     reportLatency,
-    resetLatency
+    resetLatency,
+    reportHidDiagnostics,
+    measureVelocity,
+    getHidMeasurementCount,
+    resetHidDiagnostics
 };

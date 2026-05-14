@@ -164,7 +164,7 @@ describe('Controller Logging', () => {
     });
 
     test('should not log pad detected message when DEBUG not set', async () => {
-      delete process.env.DEBUG;
+      process.env.DEBUG = 'false';
       const detect = require('../src/detect');
       const midiOutput = require('../src/midiOutput');
       const mapper = require('../src/mapper');
