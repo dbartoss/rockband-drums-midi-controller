@@ -8,6 +8,7 @@ const detect = require('./detect');
 const midiOutput = require('./midiOutput');
 const mapper = require('./mapper');
 const logger = require('./logger');
+const latencyMonitor = require('./latencyMonitor');
 
 let isRunning = false;
 let pollInterval = null;
@@ -15,6 +16,9 @@ let hidDevice = null;
 
 // Track previous HID state for deduplication
 let previousHidState = null;
+
+// Latency monitoring
+let latencyAggregator = null;
 
 /**
  * Extract non-zero bytes from HID data
@@ -54,6 +58,13 @@ async function start(device) {
         const logMidiPress = logger.midiPressLogger(appConfig);
         const logMidiRelease = logger.midiReleaseLogger(appConfig);
 
+        // Initialize latency monitoring
+        latencyAggregator = latencyMonitor.createLatencyAggregator();
+        const hidReadTime = latencyAggregator.getTracker('HID Read', 5);
+        const mapTime = latencyAggregator.getTracker('Mapping', 2);
+        const midiSendTime = latencyAggregator.getTracker('MIDI Send', 5);
+        const pollCycleTime = latencyAggregator.getTracker('Poll Cycle', 0);
+
         // Start polling loop
         isRunning = true;
         let previousState = {};
@@ -62,10 +73,14 @@ async function start(device) {
         logger.diagnosticModeLogger(appConfig)('🔍 DIAGNOSTIC MODE ENABLED - Not sending MIDI, only logging pad detections');
 
         pollInterval = setInterval(() => {
+            const cycleStart = pollCycleTime.start();
+
             try {
                 // Read HID data
+                const hidReadStart = hidReadTime.start();
                 const data = hidDevice.readSync();
                 const now = Date.now();
+                hidReadTime.end(hidReadStart, { padName: 'HID Read' });
 
                 // Only log HID if data changed (deduplication)
                 const currentHidState = data.toString('hex');
@@ -77,7 +92,9 @@ async function start(device) {
                 }
 
                 // Map to pad press
+                const mapStart = mapTime.start();
                 const padPress = mapper.mapHidDataToPad(data);
+                mapTime.end(mapStart, { padName: padPress?.padName || 'none' });
 
                 // State tracking and MIDI sending
                 if (padPress) {
@@ -96,7 +113,10 @@ async function start(device) {
                                     const midiNote = mapper.mapPadToNote(padName);
                                     const velocity = mapper.getVelocity(rawVelocity);
 
+                                    const midiStart = midiSendTime.start();
                                     midiOutput.sendNoteOn(midiNote, velocity);
+                                    midiSendTime.end(midiStart, { padName, action: 'note-on' });
+
                                     logMidiPress(padName, midiNote, velocity);
                                 } catch (error) {
                                     logger.errorLogger(`Error sending MIDI for ${padName}`, error);
@@ -114,7 +134,11 @@ async function start(device) {
                             if (!appConfig.diagnosticMode) {
                                 try {
                                     const midiNote = mapper.mapPadToNote(padName);
+
+                                    const midiStart = midiSendTime.start();
                                     midiOutput.sendNoteOff(midiNote);
+                                    midiSendTime.end(midiStart, { padName, action: 'note-off' });
+
                                     logMidiRelease(padName, midiNote);
                                 } catch (error) {
                                     logger.errorLogger(`Error sending note-off for ${padName}`, error);
@@ -125,6 +149,8 @@ async function start(device) {
                         }
                     }
                 }
+
+                pollCycleTime.end(cycleStart, { padName: padPress?.padName || 'none' });
 
             } catch (error) {
                 logger.errorLogger('Error in polling loop', error);
@@ -167,7 +193,29 @@ function stop() {
     logger.controllerStopLogger();
 }
 
+/**
+ * Report latency statistics
+ */
+function reportLatency() {
+    if (!latencyAggregator) {
+        console.log('Latency monitoring not initialized. Start the controller first.');
+        return;
+    }
+    latencyAggregator.reportAll();
+}
+
+/**
+ * Reset latency statistics
+ */
+function resetLatency() {
+    if (latencyAggregator) {
+        latencyAggregator.resetAll();
+    }
+}
+
 module.exports = {
     start,
-    stop
+    stop,
+    reportLatency,
+    resetLatency
 };
