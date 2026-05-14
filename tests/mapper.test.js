@@ -67,47 +67,88 @@ describe('Mapper', () => {
   });
 
   describe('mapHidDataToPad', () => {
-    test('should return null when byte[0] is 0', () => {
+    test('should return empty array when byte[0] is 0', () => {
       const data = Buffer.alloc(27);
       data[2] = 8;   // blue X (stuck, ignored)
       data[3] = 128; // pressure (ignored)
       const result = mapper.mapHidDataToPad(data);
-      expect(result).toBeNull();
+      expect(result).toEqual([]);
     });
 
     test('should detect byte[0] = 1 (blue pad - tom-tom)', () => {
       const data = Buffer.alloc(27);
       data[0] = 1;
       const result = mapper.mapHidDataToPad(data);
-      expect(result).toEqual({ padName: 'blue', velocity: 1 });
+      expect(result).toEqual([{ padName: 'blue', velocity: 1 }]);
     });
 
     test('should detect byte[0] = 2 (green pad - crash cymbal)', () => {
       const data = Buffer.alloc(27);
       data[0] = 2;
       const result = mapper.mapHidDataToPad(data);
-      expect(result).toEqual({ padName: 'green', velocity: 2 });
+      expect(result).toEqual([{ padName: 'green', velocity: 2 }]);
     });
 
     test('should detect byte[0] = 4 (red pad - snare drum)', () => {
       const data = Buffer.alloc(27);
       data[0] = 4;
       const result = mapper.mapHidDataToPad(data);
-      expect(result).toEqual({ padName: 'red', velocity: 4 });
+      expect(result).toEqual([{ padName: 'red', velocity: 4 }]);
     });
 
     test('should detect byte[0] = 8 (yellow pad - hi-hat)', () => {
       const data = Buffer.alloc(27);
       data[0] = 8;
       const result = mapper.mapHidDataToPad(data);
-      expect(result).toEqual({ padName: 'yellow', velocity: 8 });
+      expect(result).toEqual([{ padName: 'yellow', velocity: 8 }]);
     });
 
     test('should detect byte[0] = 16 (kick pedal - bass drum)', () => {
       const data = Buffer.alloc(27);
       data[0] = 16;
       const result = mapper.mapHidDataToPad(data);
-      expect(result).toEqual({ padName: 'kick', velocity: 16 });
+      expect(result).toEqual([{ padName: 'kick', velocity: 16 }]);
+    });
+
+    test('should detect two simultaneous pads (red + yellow = 12)', () => {
+      const data = Buffer.alloc(27);
+      data[0] = 4 | 8; // red + yellow
+      const result = mapper.mapHidDataToPad(data);
+      expect(result).toHaveLength(2);
+      expect(result).toContainEqual({ padName: 'red', velocity: 4 });
+      expect(result).toContainEqual({ padName: 'yellow', velocity: 8 });
+    });
+
+    test('should detect two simultaneous pads (blue + kick = 17)', () => {
+      const data = Buffer.alloc(27);
+      data[0] = 1 | 16; // blue + kick
+      const result = mapper.mapHidDataToPad(data);
+      expect(result).toHaveLength(2);
+      expect(result).toContainEqual({ padName: 'blue', velocity: 1 });
+      expect(result).toContainEqual({ padName: 'kick', velocity: 16 });
+    });
+
+    test('should detect three simultaneous pads (red + yellow + kick = 28)', () => {
+      const data = Buffer.alloc(27);
+      data[0] = 4 | 8 | 16; // red + yellow + kick
+      const result = mapper.mapHidDataToPad(data);
+      expect(result).toHaveLength(3);
+      expect(result).toContainEqual({ padName: 'red', velocity: 4 });
+      expect(result).toContainEqual({ padName: 'yellow', velocity: 8 });
+      expect(result).toContainEqual({ padName: 'kick', velocity: 16 });
+    });
+
+    test('should detect all five pads simultaneously (31)', () => {
+      const data = Buffer.alloc(27);
+      data[0] = 1 | 2 | 4 | 8 | 16; // all pads
+      const result = mapper.mapHidDataToPad(data);
+      expect(result).toHaveLength(5);
+      const padNames = result.map(p => p.padName);
+      expect(padNames).toContain('blue');
+      expect(padNames).toContain('green');
+      expect(padNames).toContain('red');
+      expect(padNames).toContain('yellow');
+      expect(padNames).toContain('kick');
     });
 
     test('should ignore constant bytes (2, 3-6, 20-26)', () => {
@@ -122,24 +163,24 @@ describe('Mapper', () => {
       data[24] = 2;
       data[26] = 2;
       const result = mapper.mapHidDataToPad(data);
-      expect(result).toBeNull();
+      expect(result).toEqual([]);
     });
 
-    test('should return null for empty buffer', () => {
+    test('should return empty array for empty buffer', () => {
       const result = mapper.mapHidDataToPad(Buffer.from([]));
-      expect(result).toBeNull();
+      expect(result).toEqual([]);
     });
 
-    test('should return null for null data', () => {
+    test('should return empty array for null data', () => {
       const result = mapper.mapHidDataToPad(null);
-      expect(result).toBeNull();
+      expect(result).toEqual([]);
     });
 
-    test('should return null for unknown byte[0] value', () => {
+    test('should return empty array for unknown byte[0] value', () => {
       const data = Buffer.alloc(27);
-      data[0] = 99; // undefined value
+      data[0] = 32; // beyond the known bits
       const result = mapper.mapHidDataToPad(data);
-      expect(result).toBeNull();
+      expect(result).toEqual([]);
     });
   });
 });

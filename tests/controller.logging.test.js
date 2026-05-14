@@ -40,7 +40,7 @@ describe('Controller Logging', () => {
       detect.openDevice.mockReturnValue(mockDevice);
       midiOutput.initMidiOutput.mockImplementation(() => {});
       midiOutput.closeMidiOutput.mockImplementation(() => {});
-      mapper.mapHidDataToPad.mockReturnValue(null);
+      mapper.mapHidDataToPad.mockReturnValue([]);
 
       const appConfig = config.getConfig();
       expect(appConfig.diagnosticMode).toBe(true);
@@ -67,7 +67,7 @@ describe('Controller Logging', () => {
       detect.openDevice.mockReturnValue(mockDevice);
       midiOutput.initMidiOutput.mockImplementation(() => {});
       midiOutput.closeMidiOutput.mockImplementation(() => {});
-      mapper.mapHidDataToPad.mockReturnValue(null);
+      mapper.mapHidDataToPad.mockReturnValue([]);
 
       const appConfig = config.getConfig();
       expect(appConfig.diagnosticMode).toBe(false);
@@ -97,7 +97,7 @@ describe('Controller Logging', () => {
       detect.openDevice.mockReturnValue(mockDevice);
       midiOutput.initMidiOutput.mockImplementation(() => {});
       midiOutput.closeMidiOutput.mockImplementation(() => {});
-      mapper.mapHidDataToPad.mockReturnValue(null);
+      mapper.mapHidDataToPad.mockReturnValue([]);
 
       await controller.start({ vendorId: 0x12ba, productId: 0x0210 });
 
@@ -120,7 +120,7 @@ describe('Controller Logging', () => {
       detect.openDevice.mockReturnValue(mockDevice);
       midiOutput.initMidiOutput.mockImplementation(() => {});
       midiOutput.closeMidiOutput.mockImplementation(() => {});
-      mapper.mapHidDataToPad.mockReturnValue(null);
+      mapper.mapHidDataToPad.mockReturnValue([]);
 
       await controller.start({ vendorId: 0x12ba, productId: 0x0210 });
 
@@ -149,7 +149,7 @@ describe('Controller Logging', () => {
       const redPadData = Buffer.alloc(27);
       redPadData[0] = 4;
       mockDevice.readSync.mockReturnValue(redPadData);
-      mapper.mapHidDataToPad.mockReturnValue({ padName: 'red', velocity: 100 });
+      mapper.mapHidDataToPad.mockReturnValue([{ padName: 'red', velocity: 100 }]);
 
       await controller.start({ vendorId: 0x12ba, productId: 0x0210 });
       jest.advanceTimersByTime(600);
@@ -178,7 +178,7 @@ describe('Controller Logging', () => {
       const redPadData = Buffer.alloc(27);
       redPadData[0] = 4;
       mockDevice.readSync.mockReturnValue(redPadData);
-      mapper.mapHidDataToPad.mockReturnValue({ padName: 'red', velocity: 100 });
+      mapper.mapHidDataToPad.mockReturnValue([{ padName: 'red', velocity: 100 }]);
 
       await controller.start({ vendorId: 0x12ba, productId: 0x0210 });
       jest.advanceTimersByTime(600);
@@ -208,7 +208,7 @@ describe('Controller Logging', () => {
       redPadData[0] = 4;
       redPadData[7] = 50;
       mockDevice.readSync.mockReturnValue(redPadData);
-      mapper.mapHidDataToPad.mockReturnValue({ padName: 'red', velocity: 100 });
+      mapper.mapHidDataToPad.mockReturnValue([{ padName: 'red', velocity: 100 }]);
 
       await controller.start({ vendorId: 0x12ba, productId: 0x0210 });
       jest.advanceTimersByTime(600);

@@ -91,22 +91,19 @@ async function start(device) {
                     logRawHid(currentHidState, nonZeroBytes);
                 }
 
-                // Map to pad press
+                // Map to all currently pressed pads (may be >1 simultaneously)
                 const mapStart = mapTime.start();
-                const padPress = mapper.mapHidDataToPad(data);
-                mapTime.end(mapStart, { padName: padPress?.padName || 'none' });
+                const padPresses = mapper.mapHidDataToPad(data);
+                mapTime.end(mapStart, { pads: padPresses.map(p => p.padName).join(',') || 'none' });
 
-                // State tracking and MIDI sending
-                if (padPress) {
-                    const { padName, velocity: rawVelocity } = padPress;
+                const activePads = new Set(padPresses.map(p => p.padName));
+                const nonZeroBytes = extractNonZeroBytes(data);
 
-                    // Log detected pad press (throttled via logger)
-                    const nonZeroBytes = extractNonZeroBytes(data);
+                // Note-on: handle every currently pressed pad
+                for (const { padName, velocity: rawVelocity } of padPresses) {
                     logPadDetection(now, padName, rawVelocity, nonZeroBytes);
 
-                    // Check if this is a new press (state change) or debounce window
                     if (!previousState[padName]) {
-                        // Button just pressed (state change from unpressed to pressed)
                         if (!lastPressTime[padName] || now - lastPressTime[padName] >= appConfig.debounceMs) {
                             if (!appConfig.diagnosticMode) {
                                 try {
@@ -127,30 +124,30 @@ async function start(device) {
                             lastPressTime[padName] = now;
                         }
                     }
-                } else {
-                    // No button currently pressed - send note-off for any previously pressed buttons
-                    for (const padName in previousState) {
-                        if (previousState[padName]) {
-                            if (!appConfig.diagnosticMode) {
-                                try {
-                                    const midiNote = mapper.mapPadToNote(padName);
+                }
 
-                                    const midiStart = midiSendTime.start();
-                                    midiOutput.sendNoteOff(midiNote);
-                                    midiSendTime.end(midiStart, { padName, action: 'note-off' });
+                // Note-off: any pad that was pressed but is no longer in the active set
+                for (const padName in previousState) {
+                    if (previousState[padName] && !activePads.has(padName)) {
+                        if (!appConfig.diagnosticMode) {
+                            try {
+                                const midiNote = mapper.mapPadToNote(padName);
 
-                                    logMidiRelease(padName, midiNote);
-                                } catch (error) {
-                                    logger.errorLogger(`Error sending note-off for ${padName}`, error);
-                                }
+                                const midiStart = midiSendTime.start();
+                                midiOutput.sendNoteOff(midiNote);
+                                midiSendTime.end(midiStart, { padName, action: 'note-off' });
+
+                                logMidiRelease(padName, midiNote);
+                            } catch (error) {
+                                logger.errorLogger(`Error sending note-off for ${padName}`, error);
                             }
-
-                            previousState[padName] = false;
                         }
+
+                        previousState[padName] = false;
                     }
                 }
 
-                pollCycleTime.end(cycleStart, { padName: padPress?.padName || 'none' });
+                pollCycleTime.end(cycleStart, { pads: [...activePads].join(',') || 'none' });
 
             } catch (error) {
                 logger.errorLogger('Error in polling loop', error);
